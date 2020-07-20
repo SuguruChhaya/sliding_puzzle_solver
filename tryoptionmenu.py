@@ -1,24 +1,34 @@
 from tkinter import *
+#!I am going to scrap the making dropdown menus because they can be really complicated.
+#*Instead, I can make entry boxes for everything and check the values
 
 root = Tk()
+black_list =[]
 
-def change(abc):
-    global my_list
-    global last
-    #b.config(values=*(my_list.remove(a.get(
-    #!I think I have to keep track of all the indexes and items or at least the mnost recent ones.
-    my_list.remove(value1.get())
-    b = OptionMenu(root, value2, *my_list)
-    b.grid(row=1, column=0)
+def check(a,b, c, d):
 
-value1 = StringVar()
-value1.set('1')
-value2 = StringVar()
-value2.set('1')
+    if checker2.get() in black_list:
+        print("lol")
+    elif checker1.get() in my_list:
+        black_list.append(checker1.get())
+        print(black_list)
+
+
+
+
+
 my_list = ['1','2','3']
-a = OptionMenu(root, value1, *my_list, command=change)
+
+checker1 = StringVar()
+checker1.trace_add('write', lambda: check("a", "b", "c", checker1))
+#*Trace add is not really working the best
+checker2=StringVar()
+checker2.trace_add('write', lambda: check("a", "b", "c", checker2))
+
+a = Entry(root, textvariable=checker1)
 a.grid(row=0, column=0)
 
-
+b = Entry(root, textvariable=checker2)
+b.grid(row=1, column=0)
 
 mainloop()
