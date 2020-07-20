@@ -1,0 +1,9 @@
+The algorithm is pretty simple.
+
+Steps:
+1. Get 1 in its place.
+2. Either get 2 in 3s place or 3 in 2s place.
+3. Get 2 and 3 in its place.
+4. Get 7 in 4s place and 4 in 7s place.
+5. Get 4 and 7 in its place.
+7. 
