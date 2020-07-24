@@ -1,7 +1,6 @@
 from tkinter import *
 
 
-
 class SetupWindow():
 
     def __init__(self, root):
@@ -146,8 +145,6 @@ class Solve():
                     self.nine_solve_col_index = self.solve_col.index(sub_col)
                     self.nine_sub_col_index = sub_col.index(item)
                     self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = '9'
-        print(self.solve_row)
-        print(self.solve_col)
 
         #*I want to copy this stage of the list as a class variable so I can reuse it when I create the GUI.
         #*I can use the .copy() method to create a new list which doesn't change its value when the original was changed.
@@ -156,33 +153,28 @@ class Solve():
 
     def solve_1(self):
         #*I am going to check whether the copy actually worked by changing original
-        
+        #*Find the initial location of '1'.
         #*A class variable list to track everything we did. Can be accessed from other classes.
         Solve.instruction_list = []
-
-        #*Find the initial location of '1'.
-        for sub_row in self.solve_row:
-            for item in sub_row:
-                if item == '1':
-                    self.one_solve_row_index = self.solve_row.index(sub_row)
-                    self.one_sub_row_index = sub_row.index(item)
-
-        #*I honestly don't know if I am going to need a column explanation but I am just going to add it there.
-        for sub_col in self.solve_col:
-            for item in sub_col:
-                if item == '1':
-                    self.one_solve_col_index = self.solve_col.index(sub_col)
-                    self.one_sub_col_index = sub_col.index(item)
-
-        print(self.one_solve_row_index)
-        print(self.one_sub_row_index)
-        print(self.one_solve_col_index)
-        print(self.one_sub_col_index)
         #*Create a while loop and include possible strategies.
         while self.solve_row[0][0] != '1':
-            #*Find the location of '9'.
-            #*I will try to reuse the index from __init__ and keep reusing it.
+            for sub_row in self.solve_row:
+                for item in sub_row:
+                    if item == '1':
+                        self.one_solve_row_index = self.solve_row.index(sub_row)
+                        self.one_sub_row_index = sub_row.index(item)
+
+            #*I honestly don't know if I am going to need a column explanation but I am just going to add it there.
+            for sub_col in self.solve_col:
+                for item in sub_col:
+                    if item == '1':
+                        self.one_solve_col_index = self.solve_col.index(sub_col)
+                        self.one_sub_col_index = sub_col.index(item)
+
             #*The boolean variables will check what kind of motion I can make.
+
+            #*The blacklist_bool stores all the moves that cannot be made
+            blacklist_bool = []
             up_bool = True
             down_bool = True
             left_bool = True
@@ -190,22 +182,91 @@ class Solve():
             #*Filter based on position.
             if self.nine_solve_row_index == 2:
                 up_bool = False
+                blacklist_bool.append(up_bool)
             if self.nine_solve_row_index == 0:
-                down_bool = False
-            
+                down_bool = False   
+                blacklist_bool.append(down_bool)
             if self.nine_solve_col_index == 2:
                 left_bool = False
-
+                blacklist_bool.append(left_bool)
             if self.nine_solve_col_index == 0:
                 right_bool = False
+                blacklist_bool.append(right_bool)
+            '''
+            For this algorithm, I have to check for the following.
+            1. Whether the empty 9 is next to the 1.
+                if it is beneficial to move (getting closer to goal), then move
+                else, don't move. Make a variable to note to never move in that way.
+            
+            2. If the space is losing in row or column, try to improve the space
+            if the space is already winning in row, try to improve column and vice versa
+
+            3. If the space is winning in both column and rows, I will need to bring the space closer to 1.
+
+            4. Conedering the non beneficial 1 move, if there are no other beneficial moves for the space, move 
+            wherever possible.
+            e.g. when the row list is [[2,1,9][7,3,8][5,6,4]], there aren't any beneficial steps neither for 1 and 
+            the space so I have to move the 8 up.`
+            '''
+            #*Covers the win/equal and lose/equal scenarios
+            #*All cases for 1 being next to 9
+            if self.one_solve_row_index == self.nine_solve_row_index  or self.nine_solve_col_index == self.one_solve_col_index:
+                #*Beneficial cases (checking whether they are right next to each other)
+                #*Covers parat of the Win/equal scenario(When open is left of 1)
+                if self.nine_sub_row_index + 1 == self.one_sub_row_index:
+                    #*Switching the places
+                    mut_1 = self.solve_row[self.one_solve_row_index][self.one_sub_row_index]
+                    mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
+                    self.solve_row[self.one_solve_row_index][self.one_sub_row_index] = mut_9
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut_1
+                    self.solve_col[self.one_solve_col_index][self.one_sub_col_index] = mut_9
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut_1
+                
+                #*Covers part of the win equal scenario(When open is above 1)
+                elif self.nine_sub_col_index + 1 == self.one_sub_col_index:
+                    mut_1 = self.solve_col[self.one_solve_col_index][self.one_sub_col_index]
+                    mut_9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                    self.solve_col[self.one_solve_col_index][self.one_sub_col_index] = mut_9
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut_1
+                    self.solve_row[self.one_solve_row_index][self.one_sub_row_index] = mut_9
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut_1
+
+                #*When open wins by 2 columns (on same row)
+                elif self.nine_sub_row_index + 2 == self.one_sub_row_index:
+                    mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
+                    other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1] = mut_9
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                    self.solve_col[self.nine_solve_col_index + 1][self.nine_sub_col_index] = mut_9
+
+                #*When open wins by 2 rows (on same column)
+                elif self.nine_sub_col_index + 2 == self.one_sub_col_index:
+                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                    other = self.solve_col[self.nine_solve_row_index][self.nine_sub_col_index + 1]
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1] = mut9
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                    self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9
+
+                #*When open loses by 2 columns (on same row)
+
+                #*When open loses by 2 rows (on same column)
+
+                #*Non-beneficial cases
+                elif self.nine_sub_row_index == self.one_sub_row_index + 1:
+                    right_bool = False
+                    blacklist_bool.append(right_bool)
+
+                elif self.nine_sub_col_index == self.one_sub_col_index + 1:
+                    down_bool = False
+                    blacklist_bool.append(down_bool)
             
             
-        print(up_bool)
-        print(down_bool)
-        print(left_bool)
-        print(right_bool)
 
-
+            break
+        print(self.solve_row)
+        print(self.solve_col)
     def solve_2_3(self):
         pass
 
