@@ -184,6 +184,7 @@ class Solve():
             down_bool = True and check_down_bool
             left_bool = True and check_left_bool
             right_bool = True and check_right_bool
+            #*At this point, right bool is true
             #*Filter based on position.
             if self.nine_solve_row_index == 2:
                 up_bool = False
@@ -216,6 +217,9 @@ class Solve():
             #*Covers the win/equal and lose/equal scenarios
             #*All cases for 1 being next to 9
             if self.one_solve_row_index == self.nine_solve_row_index  or self.nine_solve_col_index == self.one_solve_col_index:
+                #?Somehow, the solve indexes are not updating properly.
+                print(self.one_solve_row_index)
+                print(self.nine_solve_row_index)
                 #*Beneficial cases (checking whether they are right next to each other)
                 #*Covers parat of the Win/equal scenario(When open is left of 1)
                 if self.nine_sub_row_index + 1 == self.one_sub_row_index and left_bool:
@@ -281,25 +285,23 @@ class Solve():
 
                 #*Non-beneficial cases
                 elif self.nine_sub_row_index == self.one_sub_row_index + 1:
-                    right_bool = False
-                    blacklist_bool.append(right_bool)
                     #!In these two cases, I wouldn't add a continue because no change has been made to the list yet.
                     #*In this case, I think I already know what options are the best.
                     #!I think I have to prevent the situation from going back to this place in the future.
                     if down_bool:
-                        print("downbool")
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1]
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
                         self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9
-                        #*Since this is a beneficial move, I don't think I need to change the check booleans
+                        check_up_bool = False
+                        print("passed")
+                        
 
                     #*I think left is never possible for any case. down and up will cover everything.
 
                     elif up_bool:
-                        print("upbool")
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
@@ -315,7 +317,6 @@ class Solve():
                     down_bool = False
                     blacklist_bool.append(down_bool)
                     if right_bool:
-                        print("right bool")
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index]
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
@@ -325,7 +326,6 @@ class Solve():
             
                     #*I think up is never possible for any case. Right and left will cover everything.
                     elif left_bool:
-                        print("left bool")
                         mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
                         other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
@@ -336,10 +336,10 @@ class Solve():
                         #*I have to make sure to reset this too.
             
             #*The lose lose scenario
-
+            
             elif self.nine_solve_row_index > self.one_solve_row_index and self.nine_solve_col_index > self.one_solve_col_index:
+
                 if (self.nine_solve_row_index - self.one_solve_row_index) < (self.nine_solve_col_index - self.one_solve_col_index):
-                    print("closer row than column")
                     if down_bool:
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1]
@@ -359,7 +359,6 @@ class Solve():
 
 
                 elif (self.nine_solve_row_index - self.one_solve_row_index) > (self.nine_solve_col_index - self.one_solve_col_index):
-                    print("close column than row")
                     if right_bool:
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index]
@@ -376,16 +375,112 @@ class Solve():
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
                         self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9 
+                    
+                #*I have to add case for same distance
+                elif (self.nine_solve_row_index - self.one_solve_row_index) == (self.nine_solve_col_index - self.one_solve_col_index):
+                    if down_bool:
+                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1]
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9 
+
+                    #*Unlikely
+                    elif right_bool:
+                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        other = self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index]
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index] = mut9
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1] = mut9
+
 
             #*The win, win scenario
+            elif self.nine_solve_row_index < self.one_solve_row_index and self.nine_solve_col_index < self.one_solve_col_index:
+                if (self.one_solve_row_index - self.nine_solve_row_index) < (self.one_solve_col_index - self.nine_solve_col_index):
+                    if up_bool:
+                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1] = mut9
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9   
+                    
+                    #*Unlikely
+                    elif left_bool:
+                        mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
+                        other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1] = mut_9
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index + 1][self.nine_sub_col_index] = mut_9
+
+                elif (self.one_solve_row_index - self.nine_solve_row_index) > (self.one_solve_col_index - self.nine_solve_col_index):
+                    if left_bool:
+                        mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
+                        other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1] = mut_9
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index + 1][self.nine_sub_col_index] = mut_9
+
+                    #*unlikely
+                    elif up_bool:
+                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1] = mut9
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9                     
+
+                elif (self.one_solve_row_index - self.nine_solve_row_index) == (self.one_solve_col_index - self.nine_solve_col_index):
+                    if up_bool:
+                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1] = mut9
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9   
+                    
+                    #*Unlikely 
+                    elif left_bool:
+                        mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
+                        other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1] = mut_9
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                        self.solve_col[self.nine_solve_col_index + 1][self.nine_sub_col_index] = mut_9
+
+            #*The win lose scenarios
+            elif (self.nine_solve_row_index < self.one_solve_row_index and self.nine_solve_col_index > self.one_solve_col_index):
+                if right_bool:
+                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                    other = self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index]
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                    self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index] = mut9
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1] = mut9
+                #?I don't think there are any other options.
+            
+            elif (self.nine_solve_row_index > self.one_solve_row_index and self.nine_solve_col_index < self.one_solve_col_index):
+                if down_bool:
+                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                    other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1]
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
+                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
+                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
+                    self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9 
+            print(up_bool)
+            print(down_bool)
+            print(left_bool)
+            print(right_bool)
+            print(self.solve_row)
+            print(self.solve_col)
+            
+        print("finished loop")
             
 
-            #*The win lose scenario
-            
-
-            break
-        print(self.solve_row)
-        print(self.solve_col)
     def solve_2_3(self):
         pass
 
