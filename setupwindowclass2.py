@@ -573,37 +573,43 @@ class SolveWindow():
                 #*I might be able to use this to move my widgets around.
                 #?If I have to change the variables directly, I don't even think I need a list.
                 #?Maybe I could check the item first, then make the text, I will see.
-                temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="hello")
-                print(temp)
                 #*I need to change the variable itself.
                 if item == '1':
-                    self.text1 = temp
-                    
-                    random_list.append(self.text1)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="1")
+                    self.text1 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text1)
                 elif item == '2':
-                    self.text2 = temp
-                    random_list.append(self.text2)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="2")
+                    self.text2 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text2)
                 elif item == '3':
-                    self.text3 = temp
-                    random_list.append(self.text3)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="3")
+                    self.text3 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text3)
                 elif item == '4':
-                    self.text4 = temp
-                    random_list.append(self.text4)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="4")
+                    self.text4 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text4)
                 elif item == '5':
-                    self.text5 = temp
-                    random_list.append(self.text5)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="5")
+                    self.text5 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text5)
                 elif item == '6':
-                    self.text6 = temp
-                    random_list.append(self.text6)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="6")
+                    self.text6 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text6)
                 elif item == '7':
-                    self.text7 = temp
-                    random_list.append(self.text7)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="7")
+                    self.text7 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text7)
                 elif item == '8':
-                    self.text8 = temp
-                    random_list.append(self.text8)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="8")
+                    self.text8 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.text8)
                 elif item == '9':
-                    self.open9 = temp
-                    random_list.append(self.open9)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="9")
+                    self.open9 = self.my_canvas.gettags(temp)
+                    random_list.append(*self.open9)
                 #?Even though I now know how this works, I need it to move the right widgets.
                 #?I cannot even get the text of the create_text because it is a complete integer.
                 if item_index == 2:
@@ -616,7 +622,8 @@ class SolveWindow():
         #?I cannot track order. 
         #*I am going to try and use tags to control order I guess.
         print(random_list)
-        self.my_canvas.move(self.text6, 30, 40)
+        #*I can use tags to move items.
+        self.my_canvas.move(self.open9, 30, 40)
         print(type(self.text1))
 
             #*Find a good way to manage the variables.
