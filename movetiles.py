@@ -167,6 +167,7 @@ def move_right():
 
 my_font = tkinter.font.Font(size=15)
 text1 = my_canvas.create_text(100, 100, text="1", font=my_font)
+#*text1 is an integer.
 text2 = my_canvas.create_text(120, 100, text="2", font=my_font)
 text3 = my_canvas.create_text(140, 100, text="3", font=my_font)
 text4 = my_canvas.create_text(100, 120, text="4", font=my_font)

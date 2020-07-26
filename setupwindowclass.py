@@ -1,5 +1,5 @@
 from tkinter import *
-
+import tkinter.font
 
 class SetupWindow():
 
@@ -464,7 +464,7 @@ class Solve():
                     left_bool = True
                     right_bool = True
             
-        self.print_list()
+        self.gotoMovetiles()
     def solve_1_up(self):
         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
         other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
@@ -510,8 +510,146 @@ class Solve():
     def solve_rest(self):
         pass
 
-    def print_list(self):
+    def gotoMovetiles(self):
         print(Solve.instruction_list)
+        solvewindow = Tk()
+        a = SolveWindow(solvewindow)
+        #*Will pass another method
+
+
+
+class SolveWindow():
+    def __init__(self, root):
+        #*Since there was a mutation issue, I am going to repeat the process.
+        self.root = root
+
+
+
+
+        self.move_row = [[MainWindow.A1.get(), MainWindow.A2.get(), MainWindow.A3.get()], 
+                        [MainWindow.B1.get(), MainWindow.B2.get(), MainWindow.B3.get()], 
+                        [MainWindow.C1.get(), MainWindow.C2.get(), MainWindow.C3.get()]]
+        
+        self.move_col = [[MainWindow.A1.get(), MainWindow.B1.get(), MainWindow.C1.get()],
+                        [MainWindow.A2.get(), MainWindow.B2.get(), MainWindow.C2.get()],
+                        [MainWindow.A3.get(), MainWindow.B3.get(), MainWindow.C3.get()]]
+        for sub_row in self.move_row:
+            for item in sub_row:
+                if item == "OPEN":
+                    self.nine_solve_row_index = self.move_row.index(sub_row)
+                    self.nine_sub_row_index = sub_row.index(item)
+                    self.move_row[self.nine_solve_row_index][self.nine_sub_row_index] = '9'
+
+        for sub_col in self.move_col:
+            for item in sub_col:
+                if item == "OPEN":
+                    self.nine_solve_col_index = self.move_col.index(sub_col)
+                    self.nine_sub_col_index = sub_col.index(item)
+                    self.move_col[self.nine_solve_col_index][self.nine_sub_col_index] = '9'
+
+        self.my_canvas = Canvas(self.root, width=300, height=300, bg="white")
+        self.my_canvas.grid(row=0, column=0, columnspan=4)
+
+        my_font = tkinter.font.Font(size=30, weight="bold")
+        #*I have to make sure the text is assigned in the right place and that self.open9 will be the OPEN space.
+        self.text1 = ""
+        self.text2 = ""
+        self.text3 = ""
+        self.text4 = ""
+        self.text5 = ""
+        self.text6 = ""
+        self.text7 = ""
+        self.text8 = ""
+        self.open9 = ""
+        self.ordered_text_list = [[self.text1, 
+                            self.text2,
+                            self.text3],
+                            [self.text4,
+                            self.text5,
+                            self.text6],
+                            [self.text7,
+                            self.text8,
+                            self.open9]]
+
+        x_counter = 100
+        y_counter = 100
+        #*I have to figue out an efficient way to manage the variables knowing where what is.
+        for sub_row in self.move_row:
+            for item in sub_row:
+                sub_row_index = self.move_row.index(sub_row)
+                item_index = sub_row.index(item)
+                item_text = self.move_row[sub_row_index][item_index]
+                print(item_text)
+                #?I think my canvas somehow assigns a number starting from 1.
+                #!Tkinter canvas assigns the integer for any new items created on the widget.
+                #*I might be able to use this to move my widgets around.
+                self.ordered_text_list[sub_row_index][item_index] = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font)
+                print(self.ordered_text_list)
+                #?Even though I now know how this works, I need it to move the right widgets.
+                print(self.ordered_text_list[sub_row_index][item_index])
+                #?I cannot even get the text of the create_text because it is a complete integer.
+                if item_index == 2:
+                    x_counter -=60
+                    y_counter += 30
+                else:
+                    x_counter += 30
+
+        self.text1 = self.ordered_text_list[0][0]
+        self.text2 = self.ordered_text_list[0][1]
+        self.text3 = self.ordered_text_list[0][2]
+        self.text4 = self.ordered_text_list[1][0]
+        self.text5 = self.ordered_text_list[1][1]
+        self.text6 = self.ordered_text_list[1][2]
+        self.text7 = self.ordered_text_list[2][0]
+        self.text8 = self.ordered_text_list[2][1]
+        self.open9 = self.ordered_text_list[2][2]
+        
+        print(self.open9)
+        self.my_canvas.move(self.open9, 30, 40)
+
+            #*Find a good way to manage the variables.
+
+        #*Since self.text_list is not correctly ordered, I don't think I should use it after ordering everything.
+
+    def loop_list(self):
+        for item in Solve.instruction_list:
+            if item == "up":
+                self.move_up()
+            elif item == "down":
+                self.move_down()
+
+            elif item == "left":
+                self.move_left()
+
+            elif item == "right":
+                self.move_right()
+
+    def move_up(self):
+        pass
+
+    def move_down(self):
+        pass
+
+    def move_left(self):
+        pass
+
+    def move_right(self):
+        pass
+
+    def row_main(self):
+        pass
+
+    def column_main(self):
+        pass
+
+    def row_sub(self):
+        pass
+
+    def column_sub(self):
+        pass
+
+
+        
 
 
 setupwindow = Tk()
