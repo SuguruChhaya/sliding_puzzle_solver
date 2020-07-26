@@ -132,6 +132,7 @@ class Solve():
                         [MainWindow.A3.get(), MainWindow.B3.get(), MainWindow.C3.get()]]
 
         #*Converting the "OPEN" to '9' for future convenience
+        #!The reason why the nine index is not updated is because I didn't include finding it in my while loop.
         for sub_row in self.solve_row:
             for item in sub_row:
                 if item == "OPEN":
@@ -153,10 +154,10 @@ class Solve():
 
     def solve_1(self):
         #!The following variables keep track of which ways I should not move to.
-        check_up_bool = True
-        check_down_bool = True
-        check_left_bool = True
-        check_right_bool = True
+        up_bool = True
+        down_bool = True
+        left_bool = True
+        right_bool = True
         #*I am going to check whether the copy actually worked by changing original
         #*Find the initial location of '1'.
         #*A class variable list to track everything we did. Can be accessed from other classes.
@@ -176,28 +177,36 @@ class Solve():
                         self.one_solve_col_index = self.solve_col.index(sub_col)
                         self.one_sub_col_index = sub_col.index(item)
 
+            for sub_row in self.solve_row:
+                for item in sub_row:
+                    if item == "9":
+                        self.nine_solve_row_index = self.solve_row.index(sub_row)
+                        self.nine_sub_row_index = sub_row.index(item)
+                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = '9'
+
+            for sub_col in self.solve_col:
+                for item in sub_col:
+                    if item == "9":
+                        self.nine_solve_col_index = self.solve_col.index(sub_col)
+                        self.nine_sub_col_index = sub_col.index(item)
+                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = '9'
+
             #*The boolean variables will check what kind of motion I can make.
 
-            #*The blacklist_bool stores all the moves that cannot be made
-            blacklist_bool = []
-            up_bool = True and check_up_bool
-            down_bool = True and check_down_bool
-            left_bool = True and check_left_bool
-            right_bool = True and check_right_bool
+
             #*At this point, right bool is true
             #*Filter based on position.
             if self.nine_solve_row_index == 2:
                 up_bool = False
-                blacklist_bool.append(up_bool)
             if self.nine_solve_row_index == 0:
                 down_bool = False   
-                blacklist_bool.append(down_bool)
+    
             if self.nine_solve_col_index == 2:
                 left_bool = False
-                blacklist_bool.append(left_bool)
+    
             if self.nine_solve_col_index == 0:
                 right_bool = False
-                blacklist_bool.append(right_bool)
+        
             '''
             For this algorithm, I have to check for the following.
             1. Whether the empty 9 is next to the 1.
@@ -218,8 +227,6 @@ class Solve():
             #*All cases for 1 being next to 9
             if self.one_solve_row_index == self.nine_solve_row_index  or self.nine_solve_col_index == self.one_solve_col_index:
                 #?Somehow, the solve indexes are not updating properly.
-                print(self.one_solve_row_index)
-                print(self.nine_solve_row_index)
                 #*Beneficial cases (checking whether they are right next to each other)
                 #*Covers parat of the Win/equal scenario(When open is left of 1)
                 if self.nine_sub_row_index + 1 == self.one_sub_row_index and left_bool:
@@ -295,7 +302,12 @@ class Solve():
                         self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
                         self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9
-                        check_up_bool = False
+                        up_bool = False
+                        #*I think I should reset everything else to true at every end of the while loop.
+                        #*I should make the variables self and create a function for this so it is easier.
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
                         print("passed")
                         
 
@@ -309,13 +321,16 @@ class Solve():
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
                         self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9       
                         #!Since this is not a beneficial move, I am going to change check booleans
-                        check_down_bool = False
+                        down_bool = False
+                        up_bool = True
+                        left_bool = True
+                        right_bool = True
+
                         #*But I will have to make sure this resets to True after the next move.                                     
                     
 
                 elif self.nine_sub_col_index == self.one_sub_col_index + 1:
-                    down_bool = False
-                    blacklist_bool.append(down_bool)
+
                     if right_bool:
                         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
                         other = self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index]
@@ -323,6 +338,11 @@ class Solve():
                         self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index] = mut9
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
                         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1] = mut9
+                        left_bool = False
+                        up_bool = True
+                        down_bool = True
+                        right_bool = True
+
             
                     #*I think up is never possible for any case. Right and left will cover everything.
                     elif left_bool:
