@@ -559,7 +559,7 @@ class SolveWindow():
         self.text8 = ""
         self.open9 = ""
 
-        random_list = []
+        self.tags_list = []
         x_counter = 100
         y_counter = 100
         #*I have to figue out an efficient way to manage the variables knowing where what is.
@@ -575,41 +575,42 @@ class SolveWindow():
                 #?Maybe I could check the item first, then make the text, I will see.
                 #*I need to change the variable itself.
                 if item == '1':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="1")
+                    #?Somehow, an int string doesn't really work well
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="one")
                     self.text1 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text1)
+                    self.tags_list.append(*self.text1)
                 elif item == '2':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="2")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="two")
                     self.text2 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text2)
+                    self.tags_list.append(*self.text2)
                 elif item == '3':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="3")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="three")
                     self.text3 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text3)
+                    self.tags_list.append(*self.text3)
                 elif item == '4':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="4")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="four")
                     self.text4 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text4)
+                    self.tags_list.append(*self.text4)
                 elif item == '5':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="5")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="five")
                     self.text5 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text5)
+                    self.tags_list.append(*self.text5)
                 elif item == '6':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="6")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="six")
                     self.text6 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text6)
+                    self.tags_list.append(*self.text6)
                 elif item == '7':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="7")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="seven")
                     self.text7 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text7)
+                    self.tags_list.append(*self.text7)
                 elif item == '8':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="8")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="eight")
                     self.text8 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.text8)
+                    self.tags_list.append(*self.text8)
                 elif item == '9':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="9")
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="nine")
                     self.open9 = self.my_canvas.gettags(temp)
-                    random_list.append(*self.open9)
+                    self.tags_list.append(*self.open9)
                 #?Even though I now know how this works, I need it to move the right widgets.
                 #?I cannot even get the text of the create_text because it is a complete integer.
                 if item_index == 2:
@@ -621,13 +622,29 @@ class SolveWindow():
         #?Ultimately, lists store integers, not variables. Since create_text creates an integer from the first create_text,
         #?I cannot track order. 
         #*I am going to try and use tags to control order I guess.
-        print(random_list)
+        self.tags_row_list = [["","",""],["","",""],["","",""]]
+        self.tags_col_list = [["","",""],["","",""],["","",""]]
+        first_row_counter = 0
+        second_row_counter = 0
+        first_col_counter = 0
+        second_col_counter = 0
+        for item in self.tags_list:
+            self.tags_row_list[first_row_counter][second_row_counter] = item
+            self.tags_col_list[first_col_counter][second_col_counter] = item
+            if self.tags_list.index(item) in [2,5,8]:
+                first_row_counter += 1
+                second_row_counter -= 2
+                first_col_counter -= 2
+                second_col_counter += 1
+            else:
+                second_row_counter += 1
+                first_col_counter += 1
+                
+        
         #*I can use tags to move items.
-        self.my_canvas.move(('1'), 30, 40)
-        print(type(self.text1))
 
             #*Find a good way to manage the variables.
-
+        
         #*Since self.text_list is not correctly ordered, I don't think I should use it after ordering everything.
 
     def loop_list(self):
