@@ -187,6 +187,19 @@ class Solve():
         error_font = tkinter.font.Font(size=60, weight="bold")
         Label(root, text="Puzzle cannot be solved!!", font=error_font, fg="red").pack()
 
+    def find_nine(self):
+        for sub_row in self.solve_row:
+            for item in sub_row:
+                if item == "9":
+                    self.nine_solve_row_index = self.solve_row.index(sub_row)
+                    self.nine_sub_row_index = sub_row.index(item)
+
+        for sub_col in self.solve_col:
+            for item in sub_col:
+                if item == "9":
+                    self.nine_solve_col_index = self.solve_col.index(sub_col)
+                    self.nine_sub_col_index = sub_col.index(item)
+
     def solve_1(self):
         #*A class variable list to track everything we did. Can be accessed from other classes.
         #!The following variables keep track of which ways I should not move to.
@@ -211,19 +224,7 @@ class Solve():
                         self.one_solve_col_index = self.solve_col.index(sub_col)
                         self.one_sub_col_index = sub_col.index(item)
 
-            for sub_row in self.solve_row:
-                for item in sub_row:
-                    if item == "9":
-                        self.nine_solve_row_index = self.solve_row.index(sub_row)
-                        self.nine_sub_row_index = sub_row.index(item)
-                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = '9'
-
-            for sub_col in self.solve_col:
-                for item in sub_col:
-                    if item == "9":
-                        self.nine_solve_col_index = self.solve_col.index(sub_col)
-                        self.nine_sub_col_index = sub_col.index(item)
-                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = '9'
+            self.find_nine()
 
             #*The boolean variables will check what kind of motion I can make.
 
@@ -488,7 +489,9 @@ class Solve():
                     down_bool = True
                     left_bool = True
                     right_bool = True
-            
+        
+        print(self.solve_row)
+        print(self.solve_col)
         self.solve_2_3_intro()
 
     def solve_1_up(self):
@@ -544,8 +547,67 @@ class Solve():
         two_distance = abs(0 - two_current_first_row) + abs(2 - two_current_second_row)
         three_distance = abs(0 - three_current_first_row) + abs(1 - three_current_second_row)
 
-        print(two_distance)
-        print(three_distance)
+        if two_distance < three_distance:
+            self.solve_2()
+        elif two_distance > three_distance:
+            self.solve_3()
+        elif two_distance == three_distance:
+            for nest_row in self.solve_row:
+                for item in nest_row:
+                    if item == '9':
+                        nine_first_row = self.solve_row.index(nest_row)
+                        nine_second_row = nest_row.index(item)
+            
+            two_distance = abs(nine_first_row - two_current_first_row) + abs(nine_second_row - two_current_second_row)
+            three_distance = abs(nine_first_row - three_current_first_row) + abs(nine_second_row - three_current_second_row)
+            if two_distance < three_distance:
+                self.solve_2()
+            elif two_distance > three_distance:
+                self.solve_3()
+
+    def solve_2(self):
+        #*Creating the booleans again.
+        up_bool = True
+        down_bool = True
+        left_bool = True
+        right_bool = True
+        while self.solve_row[0][2] != '2':
+            #*I should definitely refactor the code for nine later on.
+            for sub_row in self.solve_row:
+                for item in sub_row:
+                    if item == '2':
+                        self.two_solve_row_index = self.solve_row.index(sub_row)
+                        self.two_sub_row_index = sub_row.index(item)
+
+            #*I honestly don't know if I am going to need a column explanation but I am just going to add it there.
+            for sub_col in self.solve_col:
+                for item in sub_col:
+                    if item == '2':
+                        self.two_solve_col_index = self.solve_col.index(sub_col)
+                        self.two_sub_col_index = sub_col.index(item)
+
+            self.find_nine()
+
+            if self.nine_solve_row_index == 2:
+                up_bool = False
+            if self.nine_solve_row_index == 0:
+                down_bool = False   
+    
+            if self.nine_solve_col_index == 2:
+                left_bool = False
+    
+            if self.nine_solve_col_index == 0:
+                right_bool = False
+
+            #*On the same row.
+            if self.two_solve_row_index == self.nine_solve_row_index  or self.two_solve_col_index == self.nine_solve_col_index:
+                pass
+            break
+        print(self.solve_row)
+        print(self.solve_col)
+
+    def solve_3(self):
+        pass
 
     def solve_4_7(self):
         pass
