@@ -1,5 +1,9 @@
 from tkinter import *
 import tkinter.font
+import pygame
+pygame.init()
+from pygame import mixer
+mixer.init()
 
 class SetupWindow():
 
@@ -117,7 +121,7 @@ class MainWindow():
     def goto_solve(self):
         a = Solve()
         #*The reason I created a separate function is to add the following line and to make sure __init__ and the other functions are separated.
-        a.solve_1()
+        a.check_inversion()
 
 #*The following class is just for solving the algorithm and doesn't create any graphics.
 class Solve():
@@ -153,16 +157,45 @@ class Solve():
         #*But since whenever the __init__ method is ran, the original updates itself, I can make a new method just for copying.
         #*Since this is such a pain and the list inside the tuple just changes, I am going to redo the process again later.
 
+
+    def check_inversion(self):
+        #!I will make a function to check for the number of inversions to see if the puzzle can actually be solved.
+        #*Check out https://www.geeksforgeeks.org/counting-inversions/#:~:text=%20%20%201%20Approach%3A%0ASuppose%20the%20number%20of,the%20base...%204%20Print%20the%20answer%20More%20
+        #*and https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
+        #*The problem arises when I try to solve for 2 and 3.
+
+        #*Convert self.solve_row into a one-dimensional list, cast them to an integer, and remove nine.
+        check_list = []
+        for sub_list in self.solve_row:
+            for item in sub_list:
+                if item != "9":
+                    check_list.append(int(item))
+        
+        inversion_count = 0
+        for i in range(len(check_list)):
+            for j in range(i + 1, len(check_list)):
+                if check_list[i] > check_list[j]:
+                    inversion_count += 1
+        
+        if inversion_count % 2 == 0:
+            self.solve_1()
+        else:
+            error = Tk()
+            self.cannot_solve(error)
+
+    def cannot_solve(self, root):
+        error_font = tkinter.font.Font(size=60, weight="bold")
+        Label(root, text="Puzzle cannot be solved!!", font=error_font, fg="red").pack()
+
     def solve_1(self):
+        #*A class variable list to track everything we did. Can be accessed from other classes.
         #!The following variables keep track of which ways I should not move to.
+        #*By emptying the list, I can remake the list as many times as I want.
+        Solve.instruction_list = []
         up_bool = True
         down_bool = True
         left_bool = True
         right_bool = True
-        #*I am going to check whether the copy actually worked by changing original
-        #*Find the initial location of '1'.
-        #*A class variable list to track everything we did. Can be accessed from other classes.
-
         #*Create a while loop and include possible strategies.
         while self.solve_row[0][0] != '1':
             for sub_row in self.solve_row:
@@ -253,43 +286,35 @@ class Solve():
 
                 #*When open wins by 2 columns (on same row)
                 elif self.nine_sub_row_index + 2 == self.one_sub_row_index and left_bool:
-                    mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
-                    other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1]
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index + 1] = mut_9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
-                    self.solve_col[self.nine_solve_col_index + 1][self.nine_sub_col_index] = mut_9
-                    Solve.instruction_list.append("left")
+                    self.solve_1_left()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
 
                 #*When open wins by 2 rows (on same column)
                 elif self.nine_sub_col_index + 2 == self.one_sub_col_index and up_bool:
-                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
-                    other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1] = mut9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
-                    self.solve_row[self.nine_solve_row_index + 1][self.nine_sub_row_index] = mut9
-                    Solve.instruction_list.append("up")
+                    self.solve_1_up()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
 
                 #*When open loses by 2 columns (on same row)
                 elif self.nine_sub_row_index - 2 == self.one_sub_row_index and down_bool:
-                    mut9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
-                    other = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1]
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1] = mut9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
-                    self.solve_col[self.nine_solve_col_index - 1][self.nine_sub_col_index] = mut9
-                    Solve.instruction_list.append("right")
+                    self.solve_1_right()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
 
                 #*When open loses by 2 rows (on same column)
                 elif self.nine_sub_col_index - 2 == self.one_sub_col_index and down_bool:
-                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
-                    other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1]
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = other
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index - 1] = mut9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = other
-                    self.solve_row[self.nine_solve_row_index - 1][self.nine_sub_row_index] = mut9
-                    Solve.instruction_list.append("down")
+                    self.solve_1_down()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
 
                 #*Non-beneficial cases
                 elif self.nine_sub_row_index == self.one_sub_row_index + 1:
@@ -464,7 +489,8 @@ class Solve():
                     left_bool = True
                     right_bool = True
             
-        self.gotoMovetiles()
+        self.solve_2_3_intro()
+
     def solve_1_up(self):
         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
         other = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index + 1]
@@ -501,8 +527,25 @@ class Solve():
         self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index - 1] = mut9
         Solve.instruction_list.append("right")
 
-    def solve_2_3(self):
-        pass
+
+    def solve_2_3_intro(self):
+        #*I am going to find out which solving appraoch (2 or 3) is better.
+        #*For that, I am first going to find their location.
+        for sub_row in self.solve_row:
+            for item in sub_row:
+                if item == '2':
+                    two_current_first_row = self.solve_row.index(sub_row)
+                    two_current_second_row = sub_row.index(item)
+                elif item == '3':
+                    three_current_first_row = self.solve_row.index(sub_row)
+                    three_current_second_row = sub_row.index(item)
+        
+        #*Finding distance.
+        two_distance = abs(0 - two_current_first_row) + abs(2 - two_current_second_row)
+        three_distance = abs(0 - three_current_first_row) + abs(1 - three_current_second_row)
+
+        print(two_distance)
+        print(three_distance)
 
     def solve_4_7(self):
         pass
@@ -514,6 +557,7 @@ class Solve():
         print(Solve.instruction_list)
         solvewindow = Tk()
         a = SolveWindow(solvewindow)
+        a.countdown()
         #*Will pass another method
 
 
@@ -577,40 +621,40 @@ class SolveWindow():
                 if item == '1':
                     #?Somehow, an int string doesn't really work well
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="one")
-                    self.text1 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text1)
+                    self.text1 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text1)
                 elif item == '2':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="two")
-                    self.text2 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text2)
+                    self.text2 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text2)
                 elif item == '3':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="three")
-                    self.text3 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text3)
+                    self.text3 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text3)
                 elif item == '4':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="four")
-                    self.text4 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text4)
+                    self.text4 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text4)
                 elif item == '5':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="five")
-                    self.text5 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text5)
+                    self.text5 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text5)
                 elif item == '6':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="six")
-                    self.text6 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text6)
+                    self.text6 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text6)
                 elif item == '7':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="seven")
-                    self.text7 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text7)
+                    self.text7 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text7)
                 elif item == '8':
                     temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="eight")
-                    self.text8 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.text8)
+                    self.text8 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.text8)
                 elif item == '9':
-                    temp = self.my_canvas.create_text(x_counter, y_counter, text=item_text, font=my_font, tags="nine")
-                    self.open9 = self.my_canvas.gettags(temp)
-                    self.tags_list.append(*self.open9)
+                    temp = self.my_canvas.create_text(x_counter, y_counter, text="", font=my_font, tags="nine")
+                    self.open9 = self.my_canvas.gettags(temp)[0]
+                    self.tags_list.append(self.open9)
                 #?Even though I now know how this works, I need it to move the right widgets.
                 #?I cannot even get the text of the create_text because it is a complete integer.
                 if item_index == 2:
@@ -640,14 +684,25 @@ class SolveWindow():
                 second_row_counter += 1
                 first_col_counter += 1
                 
-        
+        #*I am going to pre-define it so it doesn' cause any errors later.
+        self.in_row_list = None
+        self.in_sub_row = None
+        self.list_counter = 0
         #*I can use tags to move items.
 
             #*Find a good way to manage the variables.
         
         #*Since self.text_list is not correctly ordered, I don't think I should use it after ordering everything.
+    def countdown(self):
+        #*I am making this function because the tiles cannot start moving right after the window pops up.
+        #*I am giving 3 second for the tiles to not move.
+        #*I think I could just make the instruction list on the right for now.
+        
+        self.my_canvas.after(3000, self.loop_list)
 
     def loop_list(self):
+        #*I wanted to place a forloop here, but since I had to use the after function, a forloop wont work.
+        '''
         for item in Solve.instruction_list:
             if item == "up":
                 self.move_up()
@@ -659,30 +714,104 @@ class SolveWindow():
 
             elif item == "right":
                 self.move_right()
-
+        '''
+        if self.list_counter < len(Solve.instruction_list):
+            if Solve.instruction_list[self.list_counter] == "up":
+                self.move_up()
+            elif Solve.instruction_list[self.list_counter] == "down":
+                self.move_down()
+            elif Solve.instruction_list[self.list_counter] == "left":
+                self.move_left()
+            elif Solve.instruction_list[self.list_counter] == "right":
+                self.move_right()
+            self.list_counter += 1
+            self.after_func = self.my_canvas.after(1000, self.loop_list)
+        else:
+            #*I am going to unbind the after function here.
+            self.my_canvas.after_cancel(self.after_func)
     def move_up(self):
-        pass
+        self.row_func()
+        self.col_func()
+        mixer.music.load("audio_files/up.mp3")
+        mixer.music.play()
+        self.my_canvas.move(self.open9, 0, 30)
+        self.my_canvas.move(self.tags_row_list[self.in_row_list + 1][self.in_sub_row], 0, -30)
+        #!Careful with mutation
+        mut1 = self.tags_row_list[self.in_row_list][self.in_sub_row]
+        mut2 = self.tags_row_list[self.in_row_list + 1][self.in_sub_row]
+        self.tags_row_list[self.in_row_list][self.in_sub_row] = mut2
+        self.tags_row_list[self.in_row_list + 1][self.in_sub_row] = mut1
+        mut3 = self.tags_col_list[self.in_col_list][self.in_sub_col]
+        mut4 = self.tags_col_list[self.in_col_list][self.in_sub_col + 1]
+        self.tags_col_list[self.in_col_list][self.in_sub_col] = mut4
+        self.tags_col_list[self.in_col_list][self.in_sub_col + 1] = mut3
 
     def move_down(self):
-        pass
+        self.row_func()
+        self.col_func()
+        mixer.music.load("audio_files/down.mp3")
+        mixer.music.play()
+        self.my_canvas.move(self.open9, 0, -30)
+        self.my_canvas.move(self.tags_row_list[self.in_row_list - 1][self.in_sub_row], 0, 30)
+        mut1 = self.tags_row_list[self.in_row_list][self.in_sub_row]
+        mut2 = self.tags_row_list[self.in_row_list - 1][self.in_sub_row]
+        self.tags_row_list[self.in_row_list][self.in_sub_row] = mut2
+        self.tags_row_list[self.in_row_list - 1][self.in_sub_row] = mut1
+        mut3 = self.tags_col_list[self.in_col_list][self.in_sub_col]
+        mut4 = self.tags_col_list[self.in_col_list][self.in_sub_col - 1]
+        self.tags_col_list[self.in_col_list][self.in_sub_col] = mut4
+        self.tags_col_list[self.in_col_list][self.in_sub_col - 1] = mut3
 
     def move_left(self):
-        pass
+        self.row_func()
+        self.col_func()
+        mixer.music.load("audio_files/left.mp3")
+        mixer.music.play()
+        self.my_canvas.move(self.open9, 30, 0)
+        self.my_canvas.move(self.tags_col_list[self.in_col_list + 1][self.in_sub_col], -30, 0)
+        mut1 = self.tags_col_list[self.in_col_list][self.in_sub_col]
+        mut2 = self.tags_col_list[self.in_col_list + 1][self.in_sub_col]
+        self.tags_col_list[self.in_col_list][self.in_sub_col] = mut2
+        self.tags_col_list[self.in_col_list + 1][self.in_sub_col] = mut1
+        mut3 = self.tags_row_list[self.in_row_list][self.in_sub_row]
+        mut4 = self.tags_row_list[self.in_row_list][self.in_sub_row + 1]
+        self.tags_row_list[self.in_row_list][self.in_sub_row] = mut4
+        self.tags_row_list[self.in_row_list][self.in_sub_row + 1] = mut3
 
     def move_right(self):
-        pass
+        self.row_func()
+        self.col_func()
+        mixer.music.load("audio_files/right.mp3")
+        mixer.music.play()
+        self.my_canvas.move(self.open9, -30, 0)
+        self.my_canvas.move(self.tags_col_list[self.in_col_list - 1][self.in_sub_col], 30, 0)
+        mut1 = self.tags_col_list[self.in_col_list][self.in_sub_col]
+        mut2 = self.tags_col_list[self.in_col_list - 1][self.in_sub_col]
+        self.tags_col_list[self.in_col_list][self.in_sub_col] = mut2
+        self.tags_col_list[self.in_col_list - 1][self.in_sub_col] = mut1
+        mut3 = self.tags_row_list[self.in_row_list][self.in_sub_row]
+        mut4 = self.tags_row_list[self.in_row_list][self.in_sub_row - 1]
+        self.tags_row_list[self.in_row_list][self.in_sub_row] = mut4
+        self.tags_row_list[self.in_row_list][self.in_sub_row - 1] = mut3
 
-    def row_main(self):
-        pass
+    def row_func(self):
+        for sub_row in self.tags_row_list:
+            for item in sub_row:
+                if item == self.open9:
+                    self.in_row_list = self.tags_row_list.index(sub_row)
+                    self.in_sub_row = sub_row.index(item)
+                    break
 
-    def column_main(self):
-        pass
+    #Might be able to delete the col func if I find it useless. I will see.
+    def col_func(self):
+        for sub_col in self.tags_col_list:
+            for item in sub_col:
+                if item == self.open9:
+                    self.in_col_list = self.tags_col_list.index(sub_col)
+                    self.in_sub_col = sub_col.index(item)
+                    break
 
-    def row_sub(self):
-        pass
 
-    def column_sub(self):
-        pass
 
 
         
