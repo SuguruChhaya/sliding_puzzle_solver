@@ -7,3 +7,4 @@ def lovescoding(name):
 
 my_name = input("Enter name: ")
 print(lovescoding(my_name))
+

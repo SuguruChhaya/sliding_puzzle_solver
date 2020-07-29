@@ -266,14 +266,7 @@ class Solve():
                 #*Covers parat of the Win/equal scenario(When open is left of 1)
                 if self.nine_sub_row_index + 1 == self.one_sub_row_index and left_bool:
                     #*Switching the places
-                    mut_1 = self.solve_row[self.one_solve_row_index][self.one_sub_row_index]
-                    mut_9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
-                    self.solve_row[self.one_solve_row_index][self.one_sub_row_index] = mut_9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut_1
-                    self.solve_col[self.one_solve_col_index][self.one_sub_col_index] = mut_9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut_1
-                    #*I think I can use continue for these cases because I want to restart after I make one move.
-                    Solve.instruction_list.append("left")
+                    self.solve_1_left()
                     up_bool = True
                     down_bool = True
                     left_bool = True
@@ -281,13 +274,7 @@ class Solve():
                     
                 #*Covers part of the win equal scenario(When open is above 1)
                 elif self.nine_sub_col_index + 1 == self.one_sub_col_index and up_bool:
-                    mut_1 = self.solve_col[self.one_solve_col_index][self.one_sub_col_index]
-                    mut_9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
-                    self.solve_col[self.one_solve_col_index][self.one_sub_col_index] = mut_9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut_1
-                    self.solve_row[self.one_solve_row_index][self.one_sub_row_index] = mut_9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut_1
-                    Solve.instruction_list.append("up")
+                    self.solve_1_up()
                     up_bool = True
                     down_bool = True
                     left_bool = True
@@ -500,7 +487,11 @@ class Solve():
         
         print(self.solve_row)
         print(self.solve_col)
-        self.solve_2()
+        #*Check whether step necessary.
+        if self.solve_row[0][1] == '2' and self.solve_row[0][2] == '3':
+            self.solve_4_7()
+        else:
+            self.solve_2()
 
     def solve_1_up(self):
         mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
@@ -619,31 +610,19 @@ class Solve():
             if self.two_solve_row_index == self.nine_solve_row_index  or self.two_solve_col_index == self.nine_solve_col_index:
                 #*location of nine winning by 1 column (same row)
                 if self.nine_solve_col_index -1 == self.two_solve_col_index:
-                    mut2 = self.solve_col[self.two_solve_col_index][self.two_sub_col_index]
-                    mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
-                    self.solve_col[self.two_solve_col_index][self.two_sub_col_index] = mut9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut2
-                    self.solve_row[self.two_solve_row_index][self.nine_solve_row_index] = mut9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut2
+                    self.solve_1_right()
                     up_bool = True
                     down_bool = True
                     left_bool = True
                     right_bool = True
-                    Solve.instruction_list.append("right")
 
                 #*9 wins by one row (same column)
                 elif self.nine_solve_row_index + 1 == self.two_solve_row_index:
-                    mut2 = self.solve_row[self.two_solve_row_index][self.two_sub_row_index]
-                    mut9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
-                    self.solve_row[self.two_solve_row_index][self.two_sub_row_index] = mut9
-                    self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut2
-                    self.solve_col[self.two_solve_col_index][self.two_sub_col_index] = mut9
-                    self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut2
+                    self.solve_1_up()
                     up_bool = True
                     down_bool = True
                     left_bool = True
                     right_bool = True
-                    Solve.instruction_list.append("up")
 
                 #*9 is closer to 2's goal position by 2 columns(same row)
                 elif self.nine_solve_col_index - 2 == self.two_solve_col_index:
@@ -755,7 +734,7 @@ class Solve():
                         up_bool = True
                         down_bool = True
                         left_bool = True
-                        right_bool = True                 
+                        right_bool = True                
                     
                 elif self.two_solve_row_index - self.nine_solve_row_index > self.nine_solve_col_index - self.two_solve_col_index:
                     if right_bool:
@@ -764,6 +743,14 @@ class Solve():
                         down_bool = True
                         left_bool = True
                         right_bool = True
+
+                    elif up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
                 elif self.two_solve_row_index - self.nine_solve_row_index == self.nine_solve_col_index - self.two_solve_col_index:
                     if up_bool:
                         self.solve_1_up()
@@ -778,6 +765,7 @@ class Solve():
                         down_bool = True
                         left_bool = True
                         right_bool = True  
+
             #*The win lose scenarios
             elif self.nine_solve_row_index < self.two_solve_row_index and self.two_solve_col_index > self.nine_solve_col_index:
                 if left_bool:
@@ -794,6 +782,11 @@ class Solve():
                     down_bool = True
                     left_bool = True
                     right_bool = True  
+
+            print(self.solve_row)
+            
+        print(self.solve_row)
+        print(self.solve_col)
 
         up_bool = True
         down_bool = True
@@ -842,22 +835,20 @@ class Solve():
                 #*On same row, nine winning by one.
                 if self.nine_solve_col_index - 1 == self.three_solve_col_index:
                     if right_bool:
-                        mut3 = self.solve_col[self.three_solve_col_index][self.three_sub_col_index]
-                        mut9 = self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
-                        self.solve_col[self.three_solve_col_index][self.three_sub_col_index] = mut9
-                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index] = mut3
-                        self.solve_row[self.three_solve_row_index][self.three_sub_row_index] = mut9
-                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut3
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
 
                 #*On same column, nine winning by one row.
                 elif self.nine_solve_row_index + 1 == self.three_solve_row_index:
                     if up_bool:
-                        mut3 = self.solve_row[self.three_solve_row_index][self.three_sub_row_index] 
-                        mut9 = self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index]
-                        self.solve_row[self.three_solve_row_index][self.three_sub_row_index] = mut9
-                        self.solve_row[self.nine_solve_row_index][self.nine_sub_row_index] = mut3
-                        self.solve_col[self.three_solve_col_index][self.three_sub_col_index] = mut9
-                        self.solve_col[self.nine_solve_col_index][self.nine_sub_col_index]
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
 
                 #*9 is closer to 3's goal position by 2 columns (same row)
                 #!I do have to make the 2 row version for when they are on the middle column
@@ -868,20 +859,181 @@ class Solve():
                     left_bool = True
                     right_bool = True
 
+                elif self.nine_solve_row_index + 2 == self.three_solve_row_index:
+                    if up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True                
+
+                #*Non-beneficial cases.
+                #*9 is losing by 1 column(same row)
+                elif self.nine_solve_col_index + 1 == self.three_solve_col_index:
+                    if down_bool:
+                        self.solve_1_down()
+                        up_bool = False
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+                    
+                    elif up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = False
+                        left_bool = True
+                        right_bool = True
                 
+                #*9 is losing by 1 row(same column)
+                elif self.nine_solve_row_index - 1 == self.three_solve_row_index:
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = False
 
+            #*The lose lose scenario
+            #*These scenarios are pretty unrealistic but I included them
+            elif self.nine_solve_row_index > self.three_solve_row_index and self.nine_solve_col_index < self.three_solve_col_index:
+                #*Better allign 9 onto the same row as 3
+                if (self.nine_solve_row_index - self.three_solve_row_index) < (self.three_solve_col_index - self.nine_solve_col_index):
+                    if down_bool:
+                        self.solve_1_down()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
 
-            break
+                elif (self.nine_solve_row_index - self.three_solve_row_index) > (self.three_solve_col_index - self.nine_solve_col_index):
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                elif (self.nine_solve_row_index - self.three_solve_row_index) == (self.three_solve_col_index - self.nine_solve_col_index):
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+                    elif down_bool:
+                        self.solve_1_down()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True   
+
+            
+            #*The win win scenario
+            elif self.nine_solve_row_index < self.three_solve_row_index and self.nine_solve_col_index > self.three_solve_col_index:
+                if self.three_solve_row_index - self.nine_solve_row_index < self.nine_solve_col_index - self.three_solve_col_index:
+                    if up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True 
+
+                elif self.three_solve_row_index - self.nine_solve_row_index > self.nine_solve_col_index - self.three_solve_col_index:
+                    if right_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True 
+
+                    #*Just in case 9 is in the middle of the first row.
+                    elif up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True                 
+
+                elif self.three_solve_row_index - self.nine_solve_row_index == self.nine_solve_col_index - self.three_solve_col_index:
+                    if up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True  
+
+                    elif right_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+            #*The win lose scenarios
+            elif self.nine_solve_row_index < self.three_solve_row_index and self.three_solve_col_index > self.nine_solve_col_index:
+                if left_bool:
+                    self.solve_1_left()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True  
+
+            elif self.nine_solve_row_index > self.three_solve_row_index and self.three_solve_col_index < self.nine_solve_col_index:
+                if down_bool:
+                    self.solve_1_down()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True  
+                
+        
+        up_bool = True
+        down_bool = True
+        left_bool = True
+        right_bool = True
 
         print(self.solve_row)
         print(self.solve_col)
 
+        
+        if not (self.solve_row[0][1] == '2' and self.move[0][2] == '3'):
+            self.find_nine()
 
-    def solve_3(self):
-        pass
+            if self.solve_row[2][2] == '9':
+                self.solve_1_right()
+                self.solve_1_down()
+            
+            self.solve_1_down()
+            self.solve_1_left()
+            self.solve_1_up()
+
+        print(self.solve_row)
+        print(self.solve_col)
+        print(Solve.instruction_list)
+        self.gotoMovetiles()
 
     def solve_4_7(self):
-        pass
+        #*I have to first make sure 4 is not in the first column
+        while '4' in self.solve_col[0]:
+            for sub_row in self.solve_row:
+                for item in sub_row:
+                    if item == '4':
+                        self.four_solve_row_index = self.solve_row.index(sub_row)
+                        self.four_sub_row_index = sub_row.index(item)
+
+            for sub_col in self.solve_col:
+                for item in sub_col:
+                    if item == '4':
+                        self.four_solve_col_index = self.solve_col.index(sub_col)
+                        self.four_sub_col_index = sub_col.index(item)
+
+            self.find_nine()
+            
+            
+
+
+            break
+
 
     def solve_rest(self):
         pass
@@ -889,6 +1041,7 @@ class Solve():
     def gotoMovetiles(self):
         print(Solve.instruction_list)
         solvewindow = Tk()
+        solvewindow.title("Solving Window")
         a = SolveWindow(solvewindow)
         a.countdown()
         #*Will pass another method
