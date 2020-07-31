@@ -1025,6 +1025,19 @@ class Solve():
                     self.four_solve_col_index = self.solve_col.index(sub_col)
                     self.four_sub_col_index = sub_col.index(item)
 
+    def find_seven(self):
+        for sub_row in self.solve_row:
+            for item in sub_row:
+                if item == '7':
+                    self.seven_solve_row_index = self.solve_row.index(sub_row)
+                    self.seven_sub_row_index = sub_row.index(item)
+
+        for sub_col in self.solve_col:
+            for item in sub_col:
+                if item == '7':
+                    self.seven_solve_col_index = self.solve_col.index(sub_col)
+                    self.seven_sub_col_index = sub_col.index(item)
+
     def solve_4_7(self):
         #*I have to first make sure 4 is not in the first column
         up_bool = True
@@ -1116,18 +1129,7 @@ class Solve():
         while self.solve_row[1][0] != '7':
             self.find_four()
             self.find_nine()
-
-            for sub_row in self.solve_row:
-                for item in sub_row:
-                    if item == '7':
-                        self.seven_solve_row_index = self.solve_row.index(sub_row)
-                        self.seven_sub_row_index = sub_row.index(item)
-
-            for sub_col in self.solve_col:
-                for item in sub_col:
-                    if item == '7':
-                        self.seven_solve_col_index = self.solve_col.index(sub_col)
-                        self.seven_sub_col_index = sub_col.index(item)
+            self.find_seven()
 
             if self.nine_solve_row_index == 2:
                 up_bool = False
@@ -1145,7 +1147,7 @@ class Solve():
                 left_bool = False
 
             #*Make sure four doesn't move down (e.g. [[1,2,3], [8,4,6], [7,9,5]])
-            if self.solve_row[1][1] == '4':
+            if self.solve_row[1][1]== '4' and self.solve_row[2][1] == '9':
                 down_bool = False
 
             #*On same row or column
@@ -1170,20 +1172,209 @@ class Solve():
                         right_bool = True
 
                 #*9 is winning by 2 columns to 7
+                elif self.nine_solve_col_index + 2 == self.seven_solve_col_index:
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+                    
+                    #*In case 4 is in between
+                    elif up_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
 
                 #*9 is losing by 2 columns to 7
+                elif self.nine_solve_col_index - 2 == self.seven_solve_col_index:
+                    if right_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                    #*In case of example like 1,2,3,8,4,6,7,9,5 after the non-beneficial move
+                    elif down_bool:
+                        self.solve_1_down()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True     
 
                 #*Because the first row is fixed, 9 cannot win or lose by 2 rows
 
-            
-            
-            
+                #*Non-beneficial cases
+                #*9 is below 7(same column)
+                elif self.nine_solve_row_index - 1 == self.seven_solve_row_index:
+                    if right_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = False
+                        right_bool = True
 
-            break
+                #*9 is right to 7(same row)
+                elif self.nine_solve_col_index - 1  == self.seven_solve_col_index:
+                    if down_bool:
+                        self.solve_1_down()
+                        up_bool = False
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                    #*For when 4 is above 9 (e.g. 1,2,3,8,4,6,7,9,5)
+                    elif left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = False
+
+            #*Lose lose scenario
+            #*Even there are 1)better allign row and 2) equal distance scenario
+            #*I think they both prefer right
+            elif self.nine_solve_row_index > self.seven_solve_row_index and self.nine_solve_col_index > self.seven_solve_col_index:
+                if right_bool:
+                    self.solve_1_right()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+
+            #*The win win scenario
+            #*Even though there are two scenarios here too, I think up and left can take it.
+            elif self.nine_solve_row_index < self.seven_solve_row_index and self.nine_solve_col_index < self.seven_solve_col_index:
+                if up_bool:
+                    self.solve_1_up()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+
+                elif left_bool:
+                    self.solve_1_left()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+
+            #*The win lose scenario
+            #*9 wins in terms of rows, loses in terms of columns
+            elif self.nine_solve_row_index < self.seven_solve_row_index and self.nine_solve_col_index > self.seven_solve_col_index:
+                if right_bool:
+                    self.solve_1_right()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+
+            #*9 wins in terms of columns, loses in terms of rows
+            elif self.nine_solve_row_index > self.seven_solve_row_index and self.nine_solve_col_index < self.seven_solve_col_index:
+                if down_bool:
+                    self.solve_1_down()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+                
+                elif right_bool:
+                    self.solve_1_right()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+
+            
 
         print(self.solve_row)
         print(self.solve_col)
         print(Solve.instruction_list)
+        
+
+        #*Put 4 next to 7
+        while self.solve_row[1][1] != '4':
+            self.find_nine()
+            self.find_four()
+
+            if self.nine_solve_row_index == 2:
+                up_bool = False
+            if self.nine_solve_row_index == 1:
+                down_bool = False   
+    
+            if self.nine_solve_col_index == 2:
+                left_bool = False
+    
+            #*Because the first column is only occupied by the 7 and a non-4.
+            if self.nine_solve_col_index == 1:
+                right_bool = False
+
+            #*On same row or column
+            if self.nine_solve_row_index == self.four_solve_row_index or self.nine_solve_col_index == self.four_solve_col_index:
+                #*9 is left of 4
+                if self.nine_solve_col_index + 1 == self.four_solve_col_index:
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+                #*9 is above 4
+                elif self.nine_solve_row_index + 1 == self.four_solve_row_index:
+                    if up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                #*9 is winning by 2 rows (not posssible)
+
+                #* 9 is winning by 2 columns
+                elif self.nine_solve_col_index + 2 == self.four_solve_col_index:
+                    if left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+                
+                #*9 is losing by 2 rows (not possible)
+
+                #*9 is losing by 2 columns (not possible because 4 will never get into this position)
+
+                #*Non-beneficial cases
+                #*9 is losing by one row (same column)
+                elif self.nine_solve_col_index - 1 == self.four_solve_col_index:
+                    if down_bool:
+                        self.solve_1_down()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                #*9 is losing by one column (same row)
+                elif self.nine_solve_row_index - 1 == self.four_solve_row_index:
+                    if right_bool:
+                        self.solve_1_right()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+                    elif left_bool:
+                        self.solve_1_left()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
+            
+
+            break
 
 
 
