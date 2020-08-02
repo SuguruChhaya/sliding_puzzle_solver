@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter.font
+from typing import Set
 import pygame
 pygame.init()
 from pygame import mixer
@@ -22,12 +23,12 @@ class SetupWindow():
         #*If I need to access these String variables later, I might have to make them class variables.
 
         self.dimension_list = ["3x3"]
-        self.dimension_dropdown = OptionMenu(self.root, self.dimension, *self.dimension_list)
+        self.dimension_dropdown = OptionMenu(self.root, SetupWindow.dimension, *self.dimension_list)
         self.dimension_dropdown.grid(row=2, column=0)
         self.speed_label = Label(self.root, text="Speed of explanation\n(Seconds per move):")
         self.speed_label.grid(row=3, column=0)
         self.speed_list = ["1sec", "2sec", "3sec", "4sec", "5sec"]
-        self.speed_dropdown = OptionMenu(self.root, self.speed, *self.speed_list)
+        self.speed_dropdown = OptionMenu(self.root, SetupWindow.speed, *self.speed_list)
         self.speed_dropdown.grid(row=4, column=0, ipadx=20, ipady=20)
         self.start_button = Button(self.root, text="Start!!", width=10, height=2, bg="orange", command=self.start)
         self.start_button.grid(row=5, column=0)
@@ -489,7 +490,7 @@ class Solve():
         print(self.solve_col)
         #*Check whether step necessary.
         if self.solve_row[0][1] == '2' and self.solve_row[0][2] == '3':
-            self.solve_4_7()
+            self.move_4()
         else:
             self.solve_2()
 
@@ -1010,7 +1011,7 @@ class Solve():
             self.solve_1_left()
             self.find_nine()
             self.solve_1_up()
-            self.solve_4_7()
+            self.move_4()
 
     def find_four(self):
         for sub_row in self.solve_row:
@@ -1038,8 +1039,7 @@ class Solve():
                     self.seven_solve_col_index = self.solve_col.index(sub_col)
                     self.seven_sub_col_index = sub_col.index(item)
 
-    def solve_4_7(self):
-        #*I have to first make sure 4 is not in the first column
+    def move_4(self):
         up_bool = True
         down_bool = True
         left_bool = True
@@ -1117,9 +1117,18 @@ class Solve():
                     left_bool = True
                     right_bool = True
             
+            print("passed1")
+            print(self.solve_row)
+            print(self.solve_col)
+            
         print(self.solve_row)
         print(self.solve_col)
         print(Solve.instruction_list)
+        self.solve_7()
+
+    def solve_7(self):
+        #*I have to first make sure 4 is not in the first column
+        
 
         up_bool = True
         down_bool = True
@@ -1234,6 +1243,14 @@ class Solve():
                         left_bool = True
                         right_bool = False
 
+                    #*For cases like 1,2,3,5,7,9,8,6,4
+                    elif up_bool:
+                        self.solve_1_up()
+                        up_bool = True
+                        down_bool = True
+                        left_bool = True
+                        right_bool = True
+
             #*Lose lose scenario
             #*Even there are 1)better allign row and 2) equal distance scenario
             #*I think they both prefer right
@@ -1287,15 +1304,51 @@ class Solve():
                     down_bool = True
                     left_bool = True
                     right_bool = True
+            
+            print("passed 1")
+            print(self.solve_row)
+
 
             
 
         print(self.solve_row)
         print(self.solve_col)
         print(Solve.instruction_list)
-        
 
+        #*In the case of 1,2,3,7,6,5,9,4,8 (or when 9 and 4 are in this position)
+        if self.solve_row[2][0] == '9' and self.solve_row[2][1] == '4':
+            #*Follow a specific step and redo the function.
+            self.find_nine()
+            self.solve_1_down()
+            self.find_nine()
+            self.solve_1_left()
+            self.find_nine()
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_left()
+            self.find_nine()
+            self.solve_1_down()
+            self.find_nine()
+            self.solve_1_right()
+            self.find_nine()
+            self.solve_1_right()
+            self.find_nine()
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_left()
+            self.find_nine()
+            self.solve_1_down()
+            self.find_nine()
+            self.solve_1_left()
+        self.solve_4_7()
+
+    def solve_4_7(self):
         #*Put 4 next to 7
+        up_bool = True
+        down_bool = True
+        left_bool = True
+        right_bool = True
+
         while self.solve_row[1][1] != '4':
             self.find_nine()
             self.find_four()
@@ -1304,13 +1357,17 @@ class Solve():
                 up_bool = False
             if self.nine_solve_row_index == 1:
                 down_bool = False   
-    
+
             if self.nine_solve_col_index == 2:
                 left_bool = False
-    
+
             #*Because the first column is only occupied by the 7 and a non-4.
             if self.nine_solve_col_index == 1:
                 right_bool = False
+
+            #*In case 7 is above 9
+            if self.solve_row[1][0] == '7' and self.solve_row[2][0] == '9':
+                down_bool = False
 
             #*On same row or column
             if self.nine_solve_row_index == self.four_solve_row_index or self.nine_solve_col_index == self.four_solve_col_index:
@@ -1372,15 +1429,96 @@ class Solve():
                         left_bool = True
                         right_bool = True
 
+            #*The lose lose scenario
+            #*The lose lose scenario is not possible since it is only
+            #*possible if 4 is in the middle, but the loop is going to end in that case.
             
+            #*The win win scenario (This is only possible if 9 is in the middle)
+            elif self.nine_solve_row_index < self.four_solve_row_index and self.nine_solve_col_index < self.four_solve_col_index:
+                if left_bool:
+                    self.solve_1_left()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+                
+            #*The win lose scenario
+            #*9 wins in terms of rows, loses in terms of columns
+            elif self.nine_solve_row_index < self.four_solve_row_index and self.nine_solve_col_index > self.four_solve_col_index:
+                if right_bool:
+                    self.solve_1_right()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+                
+            #*9 wins in terms of column, loses in terms of rows
+            elif self.nine_solve_row_index > self.four_solve_row_index and self.nine_solve_col_index < self.four_solve_col_index:
+                if down_bool:
+                    self.solve_1_down()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+                
+                #*In case of 1,2,3,7,6,4,9,8,5
+                elif left_bool:
+                    self.solve_1_down()
+                    up_bool = True
+                    down_bool = True
+                    left_bool = True
+                    right_bool = True
+            print("passed 2")
+            print(self.solve_row)
 
-            break
+        #*Putting 4 and 7 to its ultimate place
+        if self.solve_row[1][2] == '9':
+            self.find_nine()
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_right()
 
+        self.find_nine()
+        self.solve_1_right()
+        self.find_nine()
+        self.solve_1_down()
+        self.find_nine()
+        self.solve_1_left()
+        #*Move to final.
+        self.solve_rest()
 
 
     def solve_rest(self):
-        pass
+        #*9 has to be in the middle. There are three cases possible.
+        self.find_nine()
+        #*Case 1: 1,2,3,4,9,5,7,8,6
+        if self.solve_row[1][2] == '5':
+            self.solve_1_left()
+            self.find_nine()
+            self.solve_1_up()
 
+        elif self.solve_row[1][2] == '6':
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_left()
+
+        elif self.solve_row[1][2] == '8':
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_left()
+            self.find_nine()
+            self.solve_1_down()
+            self.find_nine()
+            self.solve_1_right()
+            self.find_nine()
+            self.solve_1_up()
+            self.find_nine()
+            self.solve_1_left()
+        
+        print(self.solve_row)
+        print(self.solve_col)
+        self.gotoMovetiles()
+        
     def gotoMovetiles(self):
         print(Solve.instruction_list)
         solvewindow = Tk()
@@ -1417,8 +1555,29 @@ class SolveWindow():
                     self.nine_sub_col_index = sub_col.index(item)
                     self.move_col[self.nine_solve_col_index][self.nine_sub_col_index] = '9'
 
+        #*Creating text on the right
+        #*I am going to put five items per line. I am first going to 
+        #*make it into a item with 5 items per nested list.
+        text_list = []
+        previous = 0
+        for item in range(0, len(Solve.instruction_list), 5):
+            text_list.append(Solve.instruction_list[previous: item])
+            previous = item
+        text_list.append(Solve.instruction_list[item:])
+
+        
+        row_counter = 1
+        for item in text_list:
+            Label(self.root, text=", ".join(item)).grid(row=row_counter, column=1)
+            row_counter += 1
+
+
+
+
+        #*Creating canvas
+
         self.my_canvas = Canvas(self.root, width=300, height=300, bg="white")
-        self.my_canvas.grid(row=0, column=0, columnspan=4)
+        self.my_canvas.grid(row=0, column=0, rowspan=row_counter)
 
         my_font = tkinter.font.Font(size=30, weight="bold")
         #*I have to make sure the text is assigned in the right place and that self.open9 will be the OPEN space.
@@ -1554,7 +1713,10 @@ class SolveWindow():
             elif Solve.instruction_list[self.list_counter] == "right":
                 self.move_right()
             self.list_counter += 1
-            self.after_func = self.my_canvas.after(1000, self.loop_list)
+
+            #*The timing is going to be based on what the user selected at first.
+            #*Not subscriptable error
+            self.after_func = self.my_canvas.after(int(SetupWindow.speed.get()[0]) * 1000, self.loop_list)
         else:
             #*I am going to unbind the after function here.
             self.my_canvas.after_cancel(self.after_func)
