@@ -1802,14 +1802,10 @@ class SolveWindow():
                     self.in_sub_col = sub_col.index(item)
                     break
 
-
-
-
-        
-
-
 setupwindow = Tk()
 setupwindow.title("Setup Window")
 a = SetupWindow(setupwindow)
 
 mainloop()
+
+print("Hello World")
